@@ -27,28 +27,39 @@ public class Client {
 	    
 	    boolean valid = false;
 	    byte[] key = generateSharedKey(socket);
-	    /*
+	    
+	    
 	    while(true) {
-		System.out.println("Enter Username(or 'quit' to exit): ");
+		System.out.print("Enter Username(or 'quit' to exit): ");
 		String userName = console.readLine();
 		if(userName.equals("quit")){
+		    out.write(encryptData(longToBytes(-1),key,false));
 		    valid = false;
 		    break;
 		}
 			
-		System.out.println("Enter Password: ");
+		System.out.print("Enter Password: ");
 		String password = console.readLine();
-		dOut.writeInt(userName.length());
-		dOut.write(userName.getBytes());
-		dOut.writeInt(password.length());
-		dOut.write(password.getBytes());
-		if(dIn.readInt() > 0){
+		byte[] len = longToBytes((long)userName.length());
+		out.write(encryptData(len, key, false));
+		byte[] name = padData(userName.getBytes(),userName.length());
+		out.write(encryptData(name,key, false));
+		len = longToBytes((long)password.length());
+		out.write(encryptData(len,key, false));
+		byte[] pass = padData(password.getBytes(),password.length());
+		out.write(encryptData(pass,key,false));
+
+		in.read(len,0,8);
+		len = encryptData(len,key,true);
+		if(bytesToLong(len) >= 0){
 		    valid = true;
 		    break;
+		}else {
+		    System.out.println("Error: incorrect username or password");
 		}
 	    }
-	    */
-	    valid=true;
+	    
+	    //valid=true;
 	    while(valid){
 		System.out.print("client_shell>");
 		commandLine = console.readLine();

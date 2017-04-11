@@ -32,6 +32,7 @@ public class Server {
 	}
 	public void run(){
 	    try {
+		socket.setSoTimeout(60000);
 		DataOutputStream out = new DataOutputStream(
 					     socket.getOutputStream());
 		DataInputStream in = new DataInputStream(
@@ -39,30 +40,53 @@ public class Server {
 		byte[] key = generateSharedKey(socket);
 		boolean valid = false;
 		int length=0;
-		/*
+		int rLength=0;
+		byte[] len = new byte[8];
+		
 		while(true){
+		    in.read(len,0,8);
+		    len = encryptData(len,key,true);
+		    length = (int)bytesToLong(len);
+		    //client disconnected
+		    if(length < 0){
+			valid = false;
+			break;
+		    }
+		    rLength = roundUp(length);
+		    byte[] cipherName = new byte[rLength];
+		    byte[] name = new byte[length];
+		    in.read(cipherName,0,cipherName.length);
+		    cipherName = encryptData(cipherName,key,true); 
+		    for(int i=0;i<length;i++){
+			name[i]=cipherName[i];
+		    }
 		    
-		    length = dIn.readInt();
-		    if(length > 0){
-			byte[] loginName = new byte[length];
-			dIn.readFully(loginName,0,loginName.length);
-			length = dIn.readInt();
-			if(length > 0){
-			    byte[] loginPass = new byte[length];
-			    dIn.readFully(loginPass,0,loginPass.length);
-			    if(new String(loginName).equals("navjeet")){
-				if(new String(loginPass).equals("pass")){
-				    valid = true;
-				    dOut.writeInt(1);
-				    break;
-				}	    
-			    }
-			}
+		    in.read(len,0,8);
+		    len = encryptData(len,key,true);
+		    length = (int)bytesToLong(len);
+		    rLength = roundUp(length);
+		    byte[] cipherPass = new byte[rLength];
+		    byte[] pass = new byte[length];
+		    in.read(cipherPass,0,cipherPass.length);
+		    cipherPass = encryptData(cipherPass,key,true);
+		    for(int i=0;i<length;i++){
+			pass[i]=cipherPass[i];
+		    }
+		    String userName = new String(name);
+		    String password = new String(pass);
+		    //REPLACE WITH 
+		    if(userName.equals("navjeet") && password.equals("navjeet")){
+			valid=true;
+			//send acknowledgement
+			out.write(encryptData(longToBytes(1),key,false));
+			break;
+		    }else {
+			out.write(encryptData(longToBytes(-1),key,false));
 		    }
 		}
-		*/
+		
 		valid=true;
-		byte[] len = new byte[8];
+		
 		while(valid){
 		    in.read(len,0,8);
 		    len = encryptData(len,key,true);
@@ -71,7 +95,7 @@ public class Server {
 			break;
 		    }
 		    length =(int) bytesToLong(len);
-		    int rLength = roundUp(length);
+		    rLength = roundUp(length);
 		    byte[] cipher = new byte[rLength];
 		    in.read(cipher, 0, cipher.length);
 		    cipher = encryptData(cipher,key,true);
