@@ -116,12 +116,13 @@ public class Client {
 	} finally {
 	    socket.close();
 	}
-    }
+    }   
+
     public static byte[] generateSharedKey(Socket socket) throws Exception{
 	ObjectOutputStream obOut = new ObjectOutputStream(
-				     socket.getOutputStream());
+				   socket.getOutputStream());
 	ObjectInputStream obIn = new ObjectInputStream(
-				      socket.getInputStream());
+				 socket.getInputStream());
 	//key agreement example
 	KeyPairGenerator kpg = KeyPairGenerator.getInstance("DH");
 	kpg.initialize(512);
@@ -138,10 +139,10 @@ public class Client {
 	//generate secret keys
 	SecretKey shared = ka.generateSecret("AES");
 	byte[] sharedKey = new byte[16];
-	for(int i=0;i<16;i++){
-	    sharedKey[i] = shared.getEncoded()[i];
-	}
-	return sharedKey;
+	    for(int i=0;i<16;i++){
+		sharedKey[i] = shared.getEncoded()[i];
+	    }
+	    return sharedKey;
     }
 }
 
